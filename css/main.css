@@ -1,0 +1,20 @@
+body{background:#fff;font-size:14px;}
+#submenu{display:none;}
+#warning{color:#ff0000;}
+#main{background:#ddd;border:1px solid #888;display:none;position:relative;}
+#main div{border:1px solid #888;font-weight:bold;height:19px;height:21px\9;line-height:18px;cursor:default;position:absolute;text-align:center;width:19px;width:21px\9;}
+.hidden{background:url(mine.gif) 0 0;}
+.flag{background:url(mine.gif) -19px 0;}
+.check{background:url(mine.gif) -38px 0;}
+.bomb{background:url(mine.gif) -57px 0;}
+.cbomb{background:url(mine.gif) -57px 0 #ff0000;}
+.wrong{background:url(mine.gif) -76px 0;}
+.num1{color:#0000ff;}
+.num2{color:#008000;}
+.num3{color:#ff0000;}
+.num4{color:#000080;}
+.num5{color:#800000;}
+.num6{color:#008080;}
+.num7{color:#000000;}
+.num8{color:#808080;}
+.game-box{width:500px;margin: 0 auto;}

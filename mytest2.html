@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #info {
+            height:60px;
+        }
+        #main,#look{
+            /*border: 1px solid #666;*/
+            position: relative;
+            height:300px;
+        }
+        #main >div,#look >div{
+            position: absolute;
+            height:19px;
+            width:19px;
+            background-color: #ccc;
+            text-align: center;
+            line-height: 19px;
+            cursor: pointer;
+        }
+        .hidden{background:url(./css/mine.gif) 0 0;}
+        .flag{background:url(./css/mine.gif) -19px 0;}
+        .check{background:url(./css/mine.gif) -38px 0;}
+        .bomb{background:url(./css/mine.gif) -57px 0;}
+        .cbomb{background:url(./css/mine.gif) -57px 0 #ff0000;}
+        .wrong{background:url(./css/mine.gif) -76px 0;}
+        .num1{color:#0000ff;}
+        .num2{color:#008000;}
+        .num3{color:#ff0000;}
+        .num4{color:#000080;}
+        .num5{color:#800000;}
+        .num6{color:#008080;}
+        .num7{color:#000000;}
+        .num8{color:#808080;}
+        #begin{cursor: pointer;}
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div>剩余地雷数：<span id="lastnum"></span>个</div>
+        <div>已用时间：<span id="time">0</span>秒</div>
+        <div>
+            <span id="begin">开始</span>
+            <span id="over"></span>
+        </div>
+    </div>
+    <div id = "main">
+
+    </div>
+    <hr>
+    <div id = "look">
+
+    </div>
+    <script src = "node_modules/jquery/dist/jquery.min.js"></script>
+    <script>
+
+        var     mineArray,//地雷数组
+                lastNum,//剩余地雷数
+                countNum,//没有被揭开的数
+                inGame = 0,//游戏状态，0结束，1进行中，2初始化完毕但没有开始
+                startTime ;//开始时间
+
+
+        $(function(){
+            $("#main").mouseup(function(e){
+                var tar = e,
+                    clicked  =  $(tar.target),
+                    id = clicked.attr("id"),
+                    cX = parseInt(id.substring(1,id.indexOf("-"))),
+                    cY = parseInt(id.substring(id.indexOf("-")+1));
+                if(inGame ==1){
+                    if(e.which ==1){
+                        /*左键*/
+                        if(clicked.hasClass("hidden")){
+                            openBlock(cX,cY);
+                        }
+                    }else if(e.which==2){
+                        /*中键*/
+                        console.log(2);
+                    }else if(e.which==3){
+                        /*右键*/
+                        console.log(3);
+                    }
+                }else if(inGame ==2){
+                    if(e.which ==1){
+                        openBlock(cX,cY);
+                        inGame =1;
+                        var now = new Date();
+                        startTime = now.getTime();
+                        //算时间的函数
+                    }
+                }
+
+
+            })
+            $('#main').bind('contextmenu', function(){ return false; }); //阻止默认右击事件
+        })
+
+
+
+
+        //初始化
+        init(10,10,10);
+        function init(x,y,num){
+            $("#lastnum").html(num);
+            $("#time").html(0);
+            $("#begin").html('开始');
+            inGame=2;
+            mineArray = new Array(x + 2);
+            for(var i = 1 ; i <= y; i++){
+                mineArray[i] = new Array(y+2);
+            }
+            for(var i = 1; i <=x ; i++){
+                for(var j = 1 ; j <=y ; j++){
+                    mineArray[i][j] = 0;
+                }
+            }
+
+            for(var i = 0 ; i <=num ; i++){
+                var cX = Math.ceil(Math.random()*x);
+                var cY = Math.ceil(Math.random()*y);
+                if(mineArray[cX][cY] != -1){
+                    mineArray[cX][cY] =-1
+                }
+            };
+
+            for(var i = 1; i<=y ;i++){
+                for(var j = 1 ; j <=x ;j++){
+                    if(mineArray[i][j] != -1){
+                        if(i>1&&j>1&&mineArray[i-1][j-1] ==-1){
+                            mineArray[i][j]++;
+                        }
+                        if(i>1&&mineArray[i-1][j]==-1){
+                            mineArray[i][j]++;
+                        }
+                        if(i>1 &&j<x&&mineArray[i-1][j+1]==-1){
+                            mineArray[i][j]++;
+                        }
+                        if(j<x&&mineArray[i][j+1]==-1){
+                            mineArray[i][j]++;
+                        }
+                        if(i<y&&j<x&&mineArray[i+1][j+1]==-1){
+                            mineArray[i][j]++;
+                        }
+                        if(i<y&&mineArray[i+1][j]==-1){
+                            mineArray[i][j]++;
+                        }
+                        if(i<y&&j>1&&mineArray[i+1][j-1]==-1){
+                            mineArray[i][j]++;
+                        }
+                        if(j>1&&mineArray[i][j-1]==-1){
+                            mineArray[i][j]++;
+                        }
+                    }
+                }
+            }
+            var block = '';
+            var block2 = '';
+            for(var i = 1; i<mineArray.length -1 ;i++){
+                for(var j = 1 ; j <mineArray[i].length -1 ;j++){
+                    block+='<div id="b'+i+'-'+j+'" ' +
+                            'style="left:'+(j-1)*20+'px ;top:'+(i-1)*20+'px;" ' +
+                            'class="hidden"></div>'
+                }
+            }
+            for(var i = 1; i<mineArray.length -1 ;i++){
+                for(var j = 1 ; j <mineArray[i].length -1 ;j++){
+                    if(mineArray[i][j]==-1){
+                        block2+='<div id="b'+i+'-'+j+'" ' +
+                                'style="left:'+(j-1)*20+'px ;top:'+(i-1)*20+'px;" class="bomb"></div>'
+                    }else if(mineArray[i][j]==0){
+                        block2+='<div id="b'+i+'-'+j+'" ' +
+                                'style="left:'+(j-1)*20+'px ;top:'+(i-1)*20+'px;" ></div>'
+                    }else if(mineArray[i][j]>0){
+                        block2+='<div id="b'+i+'-'+j+'" ' +
+                                'style="left:'+(j-1)*20+'px ;top:'+(i-1)*20+'px;" class="num'+mineArray[i][j]+'">'+mineArray[i][j]+'</div>'
+                    }
+
+                }
+            }
+            $("#main").html(block)
+            $("#look").html(block2);
+        };
+        //翻开
+        function openBlock(x,y){
+            var current = $("#b"+ x +'-'+y);
+            if(mineArray[x][y]==-1){
+                //如果是雷
+                current.addClass("cbomb");
+                if(inGame ==1){
+                    //进行中
+                    endGame();
+                    console.log("nowing");
+                }else if(inGame ==2){
+                    //初始化
+                    console.log("begin");
+                }else{
+                    //结束
+                    console.log("over");
+                }
+            } else  if(mineArray[x][y] >0){
+                //不是雷的时候
+                current.html(mineArray[x][y]).addClass("num"+mineArray[x][y]).removeClass("hidden");
+            }else{
+                current.removeClass("hidden");
+                if(inGame){
+                    countNum--;
+                    var row = mineArray.length - 2,
+                        col = mineArray[x].length -2;
+                    if( x > 1 && y>1 &&$("#b"+(x-1)+"-"+(y-1)).hasClass("hidden")){
+                        openBlock(x-1,y-1);
+                    };
+                    if( x > 1&&$("#b"+(x -1)+"-"+y).hasClass("hidden")){
+                        openBlock(x-1,y);
+                    };
+                    if(x >1 &&y<col&&$("#b"+(x-1)+"-"+(y+1)).hasClass("hidden")){
+                        openBlock(x-1,y+1);
+                    };
+                    if(y<col && $("#b"+x +"-"+(y+1)).hasClass("hidden")){
+                        openBlock(x ,y+1);
+                    };
+                    if(x <row && y<col && $("#b"+(x+1)+"-"+(y+1)).hasClass("hidden")){
+                        openBlock(x+1,y+1);
+                    };
+                    if(x <row &&　$("#b"+(x+1)+"-"+(y-1)).hasClass("hidden")){
+                        openBlock(x+1,y-1);
+                    };
+                    if(x<row && y> 1 && $("#b"+(x+1) + '-'+(y-1)).hasClass("hidden")){
+                        openBlock(x+1,y-1);
+                    }
+                    if(y>1&&$("#b"+x +"-"+(y-1)).hasClass("hidden")){
+                        openBlock(x,y-1)
+                    }
+                }
+            }
+        };
+        //结束
+        function endGame(isWin){
+            inGame = 0;
+            for(var i = 1;i < mineArray.length -1; i++){
+                for(var j = 1 ; j < mineArray[i].length -1;j++){
+                    if(isWin){
+                        //赢了
+                    }else{
+                        openBlock(i,j);
+                    }
+                }
+            }
+            $("#over").html(isWin?"赢了":"输了");
+        }
+
+
+    </script>
+</body>
+</html>
