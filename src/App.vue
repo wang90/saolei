@@ -11,12 +11,13 @@
         <div  
           :key= i
           v-for="(l,i) in line" 
-          @click="choose(l,index,i)">
+          @click="choose($event,l,index,i)">
           <block 
             :value="l.value"
             :active="l.active"
             :error="l.error"
             :touched="l.touched"
+            :win="win"
             ></block>
         </div>
       </div>
@@ -58,6 +59,8 @@ export default {
       isPlay:true,
       count: 10,
       nums: 0,
+      remain: 0 ,
+      win: false,
     }
   },
   components:{'block':Block},
@@ -68,6 +71,10 @@ export default {
     init () {
       this.isPlay = true;
       this.message = "";
+      this.count = 10;
+      this.nums  = 0 ;
+      this.remain = 0;
+      this.win = false;
       this.initData();
     },
     initData() {
@@ -101,6 +108,7 @@ export default {
           }
         })
       })
+      this.beOver();
     },
     minShuffle (array, count = array.length) {
       let index;
@@ -140,19 +148,25 @@ export default {
         })
       })
     },
-    choose( e, row, col ) {
+    choose( $event, e, row, col ) {
+      console.log($event);
       if ( this.isPlay && !e.active) {
-        if ( e.value === 9) {
-          this.$set( this.list, this.list[row][col]['error'] = true);
-          this.$set( this.list, this.list[row][col]['touched'] = true);
-          this.$set( this.list, this.list[row][col]['active'] = true );
-          this.playEnd();
-        } else if ( e.value === 0 ) {
-          console.log('需要遍历');
-          this.searchValueNone({ row, col } )
-        } else {
-          this.$set( this.list, this.list[row][col]['active'] = true );
-          this.$set( this.list, this.list[row][col]['touched'] = true );
+        if ($event.button === 0) {
+          if ( e.value === 9) {
+            this.$set( this.list, this.list[row][col]['error'] = true);
+            this.$set( this.list, this.list[row][col]['touched'] = true);
+            this.$set( this.list, this.list[row][col]['active'] = true );
+            this.playEnd();
+          } else if ( e.value === 0 ) {
+            console.log('需要遍历');
+            this.searchValueNone({ row, col } );
+            this.beOver();
+          } else {
+            this.$set( this.list, this.list[row][col]['active'] = true );
+            this.$set( this.list, this.list[row][col]['touched'] = true );
+            this.remain +=1;
+            this.beOver();
+          }
         }
       }
     },
@@ -161,11 +175,11 @@ export default {
       this.searchValue( row , col);
     },
     searchValue(rowIndex, colIndex) {
-
       const currentIndex = this.list[rowIndex] ? this.list[rowIndex][colIndex] || null : null;
       if (currentIndex &&  currentIndex['active'] === false) {
         if ( currentIndex['value'] === 0 ) {
           this.$set( this.list, this.list[rowIndex][colIndex]['active'] = true );
+          this.remain +=1;
           AROUND.forEach( offset => {
             const row = rowIndex + offset[0];
             const col = colIndex + offset[1];
@@ -176,20 +190,39 @@ export default {
                 if ( current['value'] !== 9 ) {
                   if (current['value'] !== 0 ) {
                     this.$set( this.list, this.list[row][col]['active'] = true );
+                    this.remain +=1;
                   } else {
                     this.searchValue( row, col );
                   }
                 } else {
                   this.$set( this.list, this.list[row][col]['active'] = true );
+                  this.remain +=1;
                 }
               }
             } 
           })
-        } else if (currentIndex['value'] !== 9) {
-          // this.$set( this.list, this.list[rowIndex][colIndex]['active'] = true );
-        }
+        } 
       }
+    },
+    beOver(){
+      console.log(this.remain);
+     if( this.nums - this.remain  > this.count){
+       // 继续游戏中;
+     } else {
+       this.isPlay = false;
+       this.win = true;
+       this.message = 'you win';
+       this.list.map(v => {
+        return v.map( _v => {
+          if ( _v.active === false) {
+            _v.active = true
+          }
+          return v;
+        })
+      })
+     }
     }
+  
   }
 }
 </script>

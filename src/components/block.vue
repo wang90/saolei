@@ -5,7 +5,8 @@
         {'touched':touched},
         {'error':error},
         {'none': active && value === 0},
-        {'die': active && value === 9}
+        {'die': active && value === 9},
+        {'win': win && value === 9}
     ]">{{getValue}}</div>
 </template>
 <style>
@@ -43,6 +44,10 @@
     background: url('../assets/die.png') no-repeat  center ;
     background-size: 70%;
   }
+  .block.win{
+    background: url('../assets/winner.png') no-repeat  center ;
+    background-size: 80%;
+  }
   .block.touched.die{
     background-color: rgba(255, 0, 0, 0.2);
   }
@@ -79,6 +84,11 @@ export default {
             required:true,
         },
         touched: {
+            type: Boolean,
+            default: false,
+            required:true,
+        },
+        win: {
             type: Boolean,
             default: false,
             required:true,
