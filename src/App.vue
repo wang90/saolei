@@ -1,7 +1,12 @@
 <template>
   <div id="app">
     <div>
-      <button @click="init">开始</button>
+      <button @click="chooseType('easy')">初级</button>
+      <button @click="chooseType('middle')">中级</button>
+      <button @click="chooseType('difficulty')">高级</button>
+    </div>
+    <div>
+      <button @mousedown="init">开始</button>
       <div>剩余地雷数:{{count}}</div>
     </div>
     <div class="play-contain">
@@ -36,8 +41,24 @@
 <script>
 const SAFE_CELL = 0;
 const MINE_CELL = 9;
-const ROWS  = 15;
-const COLS = 10;
+
+const TYPE  = {
+  easy : {
+    ROWS:15,
+    COLS:10,
+    COUNT: 10,
+  },
+  middle: {
+    ROWS:30,
+    COLS:20,
+    COUNT: 50,
+  },
+  difficulty:{
+    ROWS:35,
+    COLS:28,
+    COUNT: 100,
+  }
+}
 const AROUND = [
   [ -1, -1 ],
   [ -1, 0 ],
@@ -55,15 +76,17 @@ export default {
   data() {
     return {
       message:"",
-      list :[],
-      isPlay:true,
+      list : [],
+      isPlay: true,
       count: 10,
       nums: 0,
       remain: 0 ,
       win: false,
+      type: 'easy',
+      current: null,
     }
   },
-  components:{'block':Block},
+  components:{ 'block': Block },
   created() {
     this.init();
   },
@@ -71,22 +94,23 @@ export default {
     init () {
       this.isPlay = true;
       this.message = "";
-      this.count = 10;
       this.nums  = 0 ;
       this.remain = 0;
       this.win = false;
+      this.current = TYPE[this.type];
       this.initData();
     },
     initData() {
-      const rows = ROWS;
-      const cols = COLS;
-      const mines = this.count;
+      const rows = this.current['ROWS'];
+      const cols = this.current['COLS'];
+      const mines = this.current['COUNT'];
+     
       const safeCellNum = rows * cols - mines;
       const safeArea = (new Array(safeCellNum).fill(SAFE_CELL ));
       const mineArea = (new Array(mines)).fill(MINE_CELL);
       let totalArea = safeArea.concat(mineArea);
       totalArea = this.minShuffle(totalArea);
-
+     
       const data = totalArea.reduce(( memo, curr, index ) => {
         if (index % cols === 0 ) {
           memo.push([curr])
@@ -96,7 +120,7 @@ export default {
         return memo;
       }, [] );
       const list = this.setEnvNum(data);
-  
+      this.count = mines;
       this.list = list.map(v=>{
         return v.map(_v=>{
           this.nums +=1;
@@ -169,6 +193,10 @@ export default {
           }
         }
       }
+    },
+    chooseType( type ) {
+      this.type  = type;
+      this.init();
     },
     searchValueNone ( data ) {
       const  { row , col } = data;
