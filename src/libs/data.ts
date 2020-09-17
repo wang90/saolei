@@ -10,11 +10,11 @@ export const initData = ( config: Initialvalue ) => {
         const cols = config['COLS'];
         const mines = config['COUNT'];
         const safeCellNum = rows * cols - mines;
-        const safeArea = new Array(safeCellNum).fill(SAFE_CELL );
-        const mineArea = ( new Array(mines) ).fill(MINE_CELL);
+        const safeArea = new Array(safeCellNum).fill(SAFE_CELL);
+        const mineArea = new Array(mines).fill(MINE_CELL);
         let totalArea = safeArea.concat(mineArea);
             totalArea = minShuffle(totalArea);
-
+        
         const data = totalArea.reduce(( memo, curr, index ) => {
             if (index % cols === 0 ) {
                 memo.push([ curr ])
@@ -23,6 +23,8 @@ export const initData = ( config: Initialvalue ) => {
             }
             return memo;
         }, [] );
+        // console.table(data)
+        // resolve(data)
         const list = setEnvNum(data);
         if (list.length > 0) {
             resolve(list)
@@ -58,6 +60,7 @@ export const setList = (list: Block[][], type: string = 'over') => {
         }
     })
 }
+// 洗牌算法
 const minShuffle  = ( array: number[][], count:number = array.length )=> {
     let index;
     while (count) {
