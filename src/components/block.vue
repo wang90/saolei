@@ -55,48 +55,47 @@
     display: none;
   } 
 </style>
-<script>
+<script lang="ts" >
+import { Component, Vue , Prop } from 'vue-property-decorator';
 
-export default {
-    name: 'Block',
-    computed:{
-        getValue() {
-            if (this.value === 0 || this.value === 9 ) {
-                return "";
-            } 
-            return this.value;
-        }
+@Component({
+  props: {
+    value: {
+      type: Number,
+      default: 0 ,
+      required: true,
     },
-    props:{
-        value: {
-            type: Number,
-            default: 0 ,
-            required:true,
-        },
-        active: {
-            type: Boolean,
-            default: false ,
-            required:true,
-        },
-        error: {
-            type: Boolean,
-            default: false ,
-            required:true,
-        },
-        touched: {
-            type: Boolean,
-            default: false,
-            required:true,
-        },
-        win: {
-            type: Boolean,
-            default: false,
-            required:true,
-        }
+    active: {
+      type: Boolean,
+      default: false ,
+      required: true,
     },
-    data() {
-        return {}
+    error: {
+      type: Boolean,
+      default: false ,
+      required: true,
     },
+    touched: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    win: {
+      type: Boolean,
+      default: false,
+      required: true,
+    }
+  }
+})
+export default class BlockCompontent extends Vue {
+  @Prop({type: Number})
+  private value!: number;
+  get getValue(): number | string {
+    if (this.value === 0 || this.value === 9 ) {
+        return "";
+    } 
+    return this.value;
+  }
 }
 </script>
 
