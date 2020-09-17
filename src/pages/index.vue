@@ -41,7 +41,7 @@ import { AROUND } from "@/config/index";
 import { initData , setList} from "@/libs/data";
 import BlockCompontent from "@/components/block.vue";
 import {GameConfig} from "@/libs/inital";
-// import { Block, Initialvalue, Coordinates } from "@/types/index";
+import { Block, Initialvalue, Coordinates } from "@/types/index";
 const firstConfig:string = 'easy';
 
 @Component({
@@ -91,88 +91,104 @@ export default class Index extends Vue{
       this.init();
   }
 
-  private choose( $event: MouseEvent, e: Block, { row, col }: Coordinates ) {
-      if ( this.isPlay && !e.active) {
-        if ($event.button === 0) {
-          if ( e.value === 9) {
-              const newValue:Block = {
-                  value:e.value,
-                  error:true,
-                  touched:true,
-                  active:true,
-              }
-            this.$set( this.list, this.list[row][col]= newValue);
-            this.playEnd();
-          } else if ( e.value === 0 ) {
-            console.log('需要遍历');
-            this.searchValueNone({ row, col } );
-            this.beOver();
-          } else {
-            const newValue:Block = {
-                value: e.value,
-                error: e.error,
-                touched: true,
-                active: true,
-              }
-            this.$set( this.list, this.list[row][col] = newValue );
-            this.remain += 1;
-            this.beOver();
-          }
+    private choose( $event: MouseEvent, e: Block, { row, col }: Coordinates ) {
+        if ( this.isPlay && !e.active) {
+            if ($event.button === 0) {
+                if ( e.value === 9) {
+                    const newValue:Block = {
+                        value: e.value,
+                        error: true,
+                        touched: true,
+                        active: true,
+                    }
+                    this.bindSetList(newValue,{row,col});
+                    this.playEnd();
+                } else if ( e.value === 0 ) {
+                    console.log('需要遍历');
+                    this.searchValueNone({ row, col } );
+                    this.beOver();
+            } else {
+                const newValue:Block = {
+                    value: e.value,
+                    error: e.error,
+                    touched: true,
+                    active: true,
+                }
+                this.bindSetList(newValue,{row,col});
+                this.remain += 1;
+                this.beOver();
+            }
         }
       }
     }
     private beOver() {
-     if( this.nums - this.remain  > this.count){
-       // 继续游戏中;
-     } else {
-       this.winner = true;
-       this.setList('you win')
-     }
+        if( this.nums - this.remain  > this.count){
+        // 继续游戏中;
+        } else {
+            this.winner = true;
+            this.setList('you win')
+        }
     }
     private searchValueNone ( data: Coordinates ) {
-      const  { row , col } = data;
-      this.searchValue( {row , col});
+        const  { row , col } = data;
+        this.searchValue( { row , col } );
     }
     private searchValue( { row, col }: Coordinates) {
-      const currentIndex = this.list[row] ? this.list[row][col] || null : null;
-      if (currentIndex &&  currentIndex['active'] === false) {
-        if ( currentIndex['value'] === 0 ) {
-          this.$set( this.list, this.list[row][col]['active'] = true );
 
-          this.remain +=1;
-          AROUND.forEach( offset => {
-            const rowIndex = row + offset[0];
-            const colIndex = col + offset[1];
-            const current = this.list[rowIndex]? this.list[rowIndex][colIndex] || null : null;
-            if ( current ) {
-              if ( current['active'] === false && current['value'] !== 9 ) {
-                
-                if ( current['value'] !== 9 ) {
-                  if (current['value'] !== 0 ) {
-                    this.$set( this.list, this.list[rowIndex][colIndex]['active'] = true );
-                    this.remain +=1;
-                  } else {
-                    this.searchValue( {row: rowIndex, col: colIndex });
-                  }
-                } else {
-                  this.$set( this.list, this.list[row][col]['active'] = true );
-                  this.remain +=1;
-                }
-              }
+        const currentIndex = this.list[row] ? this.list[row][col] || null : null;
+        
+        if (currentIndex &&  currentIndex['active'] === false) {
+            
+            if ( currentIndex['value'] === 0 ) {
+                // const newValue: Block = this.list[row][col];
+                currentIndex['active'] = true;
+                this.bindSetList( currentIndex,{ row , col } );
+                this.remain +=1;
+                AROUND.forEach( offset => {
+                    const rowIndex: number = row + offset[0];
+                    const colIndex:number  = col + offset[1];
+                    const current = this.list[rowIndex]? this.list[rowIndex][colIndex] || null : null;
+                    
+                    if ( current ) {
+
+                        if ( current['active'] === false && current['value'] !== 9 ) {
+
+                            if ( current['value'] !== 9 ) {
+                  
+                                if (current['value'] !== 0 ) {
+
+                                    current['active'] = true;
+                                    this.bindSetList( current,{ row: rowIndex , col: colIndex } );
+                                    this.remain +=1;
+
+                                } else {
+
+                                    this.searchValue( {row: rowIndex, col: colIndex });
+                                }
+                            } else {
+
+                                current['active'] = true;
+                                this.bindSetList( current, { row: rowIndex , col: colIndex } );
+                                this.remain +=1;
+                            }
+                        }
+                    } 
+                })
             } 
-          })
-        } 
-      }
+        }
     }
     private playEnd () {
-      this.setList('你踩到地雷了');
+        this.setList('你踩到地雷了');
     }
     private setList ( msg: string = '') {
-      this.message = msg;
-      this.isPlay = false;
-      setList(this.list).then( (list: Block[][]) =>{
-        this.$set(this.list, list);
-      });
+        this.message = msg;
+        this.isPlay = false;
+        setList(this.list).then( (list: Block[][]) =>{
+            this.list  = JSON.parse(JSON.stringify(list)) as Block[][];
+        });
+    }
+    private bindSetList( data: Block, { row, col }: Coordinates) {
+      this.$set(this.list[row], col, data);
     }
 }
 </script>

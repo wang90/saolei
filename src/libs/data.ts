@@ -27,7 +27,7 @@ export const initData = ( config: Initialvalue ) => {
         resolve(list)
       });
 } 
-export const setList = (list: Block[][], type: string = 'over') => {
+export const setList = (list: Block[][], type: string = 'over')=> {
     return new Promise((resolve, reject) => {
         const newList:Block[][] =  list.map( v => {
             return v.map( _v => { 
