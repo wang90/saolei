@@ -20,6 +20,11 @@ export const TYPE:{ [key: string]: Initialvalue; }  = {
       COUNT: 100,
     }
 }
+export const TYPE_NAME:{ [key: string]: string }  = {
+  'easy' : '初级',
+  'middle': '中级',
+  'difficulty': '高级',
+}
 export const AROUND = [
     [ -1, -1 ],
     [ -1, 0 ],
@@ -29,6 +34,12 @@ export const AROUND = [
     [ 1, -1 ],
     [ 1, 0 ],
     [ 1, 1 ],
-  ]
+]
+
+export const START_VALUE: string[] = [
+  '开始',
+  '重制中',
+  '重新开始',
+]
 
 

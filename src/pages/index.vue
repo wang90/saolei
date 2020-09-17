@@ -1,13 +1,17 @@
 <template>
-  <div>
-    <div>
-      <button @click="chooseType('easy')">初级</button>
-      <button @click="chooseType('middle')">中级</button>
-      <button @click="chooseType('difficulty')">高级</button>
+  <div class="contain">
+    <div class="games-type">
+      <button v-for="(v,index) in tabLists"  
+              :key="index" 
+              :class="['btn',{'active':type === v.type}]" 
+              @click="chooseType(v.type)">{{v.name}}</button>
     </div>
-    <div>
-      <button @mousedown = "init">开始</button>
+    <div class="start">
+      <button class="btn" @mousedown = "init">{{startValue}}</button>
+    </div>
+    <div class="game-info">
       <div>剩余地雷数:{{count}}</div>
+      <h6>{{message}}</h6>
     </div>
     <div class="play-contain">
       <div class="lines" 
@@ -27,21 +31,55 @@
         </div>
       </div>
     </div>
-      <h6>{{message}}</h6>
   </div>
 </template>
 <style>
+  .contain {
+    padding: 30px;
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn {
+    height: 30px;
+    line-height: 30px;
+    width: 100px;
+    text-align: center;
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 10px;
+    transition: all 0.2s;
+    border: 1px solid transparent;  
+    outline: none;   
+    border-radius: 5px;
+    box-shadow: 0 0 4px 1px #f6f6f6;
+  }
+  .btn.active {
+    background: #333;
+    color:#fff;
+  }
  .lines {
     display: flex;
+  }
+  .start{
+    padding: 12px 0;
+  }
+  .game-info{
+    height: 50px;
+  }
+  .game-info > h6{
+    text-align: center;
+    padding: 5px 0;
   }
 </style>
 <script lang = "ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { AROUND } from "@/config/index";
+import { TYPE, AROUND ,TYPE_NAME, START_VALUE } from "@/config/index";
 import { initData , setList} from "@/libs/data";
 import BlockCompontent from "@/components/block.vue";
-import {GameConfig} from "@/libs/inital";
-import { Block, Initialvalue, Coordinates } from "@/types/index";
+import { GameConfig } from "@/libs/inital";
+import { Block, Initialvalue, Coordinates , TabItem } from "@/types/index";
 const firstConfig:string = 'easy';
 
 @Component({
@@ -60,10 +98,20 @@ export default class Index extends Vue{
   private winner: boolean = false;
   private type: string = firstConfig;
   private current: Initialvalue = new GameConfig(firstConfig);
+  private tabLists: TabItem[] = [];
+  private startValue: string = START_VALUE[0];
 
   // lifed
   private created() {
-    console.log('init');
+    const keys = Object.keys(TYPE);
+    this.tabLists = keys.map(( v: string) => {
+      const item: TabItem = {
+        active : false,
+        type: v,
+        name: TYPE_NAME[v],
+      }
+      return item;
+    })
     this.init();
   }
   // methods
@@ -74,17 +122,19 @@ export default class Index extends Vue{
     this.remain = 0;
     this.winner = false;
     this.current = new GameConfig(this.type);
+    this.startValue = START_VALUE[1];
 
-    initData( this.current ).then((list: Block[][]) => {
+    initData( this.current ).then((list: unknown) => {
       
       this.count = this.current['COUNT'];
       this.nums = this.current['ROWS'] * this.current['COLS'];
 
-      setList( list, 'create').then(( ls: Block[][]) => {
+      setList( list as Block[][], 'create').then(( ls: unknown) => {
         this.list = ls as Block[][];
+        this.startValue = START_VALUE[2];
         this.beOver();
-      });
-    })
+      }).catch(()=>{});
+    }).catch(()=>{});
   }
   private chooseType( type: string ) {
       this.type  = type;
@@ -183,9 +233,10 @@ export default class Index extends Vue{
     private setList ( msg: string = '') {
         this.message = msg;
         this.isPlay = false;
-        setList(this.list).then( (list: Block[][]) =>{
+        setList(this.list).then( (list: unknown) =>{
             this.list  = JSON.parse(JSON.stringify(list)) as Block[][];
-        });
+            this.startValue = START_VALUE[2];
+        }).catch(()=>{})
     }
     private bindSetList( data: Block, { row, col }: Coordinates) {
       this.$set(this.list[row], col, data);

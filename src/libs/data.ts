@@ -1,6 +1,6 @@
 
 
-import { SAFE_CELL, MINE_CELL ,AROUND} from "@/config/index";
+import { SAFE_CELL, MINE_CELL ,AROUND } from "@/config/index";
 import { Initialvalue, Block } from "@/types/index";
 
 
@@ -24,11 +24,15 @@ export const initData = ( config: Initialvalue ) => {
             return memo;
         }, [] );
         const list = setEnvNum(data);
-        resolve(list)
+        if (list.length > 0) {
+            resolve(list)
+        }else{
+            reject();
+        }
       });
 } 
-export const setList = (list: Block[][], type: string = 'over')=> {
-    return new Promise((resolve, reject) => {
+export const setList = (list: Block[][], type: string = 'over') => {
+    return new Promise((resolve, reject): void => {
         const newList:Block[][] =  list.map( v => {
             return v.map( _v => { 
                 let nv:Block = _v;
@@ -47,7 +51,11 @@ export const setList = (list: Block[][], type: string = 'over')=> {
                 return nv;
             })
         })
-        resolve(newList)
+        if (newList.length > 0) {
+            resolve(newList)
+        } else {
+            reject()
+        }
     })
 }
 const minShuffle  = ( array: number[][], count:number = array.length )=> {

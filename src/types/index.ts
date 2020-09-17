@@ -13,3 +13,9 @@ export interface Initialvalue {
     COLS: number;
     COUNT: number;
 }
+
+export interface TabItem {
+    active:boolean;
+    name: string;
+    type: string;
+}
