@@ -6,7 +6,7 @@ export interface Block {
     active: boolean;
     error: boolean;
     touched: boolean;
-    value: number;
+    readonly value: number;
 }
 export interface Initialvalue {
     ROWS: number;
